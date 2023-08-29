@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haccp</title>
+    
+</head>
+<body>
+    <button id="apiButton">Init</button>
+    <button>Add</button>
+    <button>Read</button>
+    <button>ReadAll</button>
+    <button>Update</button>
+    <script>
+        document.getElementById("apiButton").addEventListener("click", function() {
+            // REST API 호출
+            fetch("http://localhost:3001/query?channelid=mychannel&chaincodeid=basic&function=GetAllHaccp", {
+                method: "GET" // 이 부분을 필요에 따라 변경 (GET, POST 등)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // API 응답 처리
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+</body>
+</html>
