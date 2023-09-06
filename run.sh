@@ -7,5 +7,6 @@ else
 ./network.sh deployCC -ccn basic -ccp ../asset-transfer-kwon/chaincode-go -ccl go
 cd ../asset-transfer-kwon/rest-api-go
 go build main.go
+echo "Test"
 ./main
 fi
