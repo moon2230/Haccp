@@ -8,5 +8,6 @@ else
 cd ../asset-transfer-kwon/rest-api-go
 go build main.go
 echo "Test"
+echo "test Moon"
 ./main
 fi
