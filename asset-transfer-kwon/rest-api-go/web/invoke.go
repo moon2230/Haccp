@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"crypto/sha256"
+
 	"github.com/hyperledger/fabric-gateway/pkg/client"
+
+	"time"
 )
 
 // Invoke handles chaincode invoke requests.
@@ -51,6 +55,7 @@ func (setup *OrgSetup) InvokeInit(w http.ResponseWriter, r *http.Request) {
 	args := r.Form["args"]
 	network := setup.Gateway.GetNetwork(channelID)
 	contract := network.GetContract(chainCodeName)
+
 	txn_proposal, err := contract.NewProposal(function, client.WithArguments(args...))
 	if err != nil {
 		fmt.Fprintf(w, "Error creating txn proposal: %s", err)
@@ -66,5 +71,120 @@ func (setup *OrgSetup) InvokeInit(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Error submitting transaction: %s", err)
 		return
 	}
+
+	fmt.Fprintf(w, "Transaction ID : %s Response: %s", txn_committed.TransactionID(), txn_endorsed.Result())
+}
+
+func (setup *OrgSetup) InvokeInit2() {
+	fmt.Println("Received Invoke request")
+
+	chainCodeName := "basic"
+	channelID := "mychannel"
+	function := "InitHaccp"
+	args := "args"
+	network := setup.Gateway.GetNetwork(channelID)
+	contract := network.GetContract(chainCodeName)
+	txn_proposal, err := contract.NewProposal(function, client.WithArguments(args))
+	if err != nil {
+		return
+	}
+	txn_endorsed, err := txn_proposal.Endorse()
+	if err != nil {
+		return
+	}
+	txn_committed, err := txn_endorsed.Submit()
+	if err != nil {
+		return
+	}
+	fmt.Printf("Transaction ID : %s Response: %s", txn_committed.TransactionID(), txn_endorsed.Result())
+}
+
+func merkleTree(layerZero [][]byte, jump int) [][]byte {
+	if len(layerZero) == 1 {
+		fmt.Println(layerZero)
+		return layerZero
+	}
+	var newLayer [][]byte
+	for i := 0; i < len(layerZero); i += jump {
+		var con []byte
+		for ii := 0; ii < jump; ii += 1 {
+			if i+ii < len(layerZero) {
+				con = append(layerZero[i+ii])
+			} else {
+				con = append(layerZero[i])
+			}
+		}
+		hash := sha256.New()
+		hash.Write([]byte(con))
+		hashSum := hash.Sum(nil)
+		newLayer = append(newLayer, hashSum)
+	}
+	if jump == 1 {
+		return layerZero
+	}
+	fmt.Println(len(layerZero))
+
+	return merkleTree(newLayer, jump)
+}
+
+func (setup *OrgSetup) DailyInvoke(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+	args := queryParams.Get("args")
+
+	db, err := databaseOpen()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	var res string
+
+	checkTable := "Select data from haccp.leaf where Factory = '" + args + "' and Date(Time) = curdate()"
+	rows, err := db.Query(checkTable)
+	if err != nil {
+		fmt.Println("Query error.")
+	}
+	defer rows.Close()
+
+	var newLayer [][]byte
+	for rows.Next() {
+		err := rows.Scan(&res)
+		if err != nil {
+			fmt.Println("Error")
+		}
+		raw := []byte(res)
+		newLayer = append(newLayer, raw)
+	}
+
+	root := merkleTree(newLayer, len(newLayer))
+	mkroot := string(root[0])
+
+	//Total hash
+
+	channelID := "mychannel"
+	chainCodeName := "basic"
+	function := "UpdateHaccp"
+
+	network := setup.Gateway.GetNetwork(channelID)
+	contract := network.GetContract(chainCodeName)
+
+	faName := args + time.Now().Format("20060102")
+
+	txn_proposal, err := contract.NewProposal(function, client.WithArguments(faName, mkroot))
+	if err != nil {
+		fmt.Fprintf(w, "Error creating txn proposal: %s", err)
+		return
+	}
+	txn_endorsed, err := txn_proposal.Endorse()
+	if err != nil {
+		fmt.Fprintf(w, "Error endorsing txn: %s", err)
+		return
+	}
+	txn_committed, err := txn_endorsed.Submit()
+	if err != nil {
+		fmt.Fprintf(w, "Error submitting transaction: %s", err)
+		return
+	}
+
 	fmt.Fprintf(w, "Transaction ID : %s Response: %s", txn_committed.TransactionID(), txn_endorsed.Result())
 }

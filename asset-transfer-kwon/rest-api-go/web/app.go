@@ -3,7 +3,6 @@ package web
 import (
 	"fmt"
 	"net/http"
-
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 )
 
@@ -22,17 +21,29 @@ type OrgSetup struct {
 
 // Serve starts http web server.
 func Serve(setups OrgSetup) {
+	//Main html page handler
+	http.HandleFunc("/", setups.PageMain)
+
+	//Blockchain Query handler - gettAll
 	http.HandleFunc("/query", setups.Query)
+
+	//Blockchain Invoke handler
 	http.HandleFunc("/invoke", setups.Invoke)
+
+	//Blockchain init handler -Init-
+	http.HandleFunc("/invokeInit", setups.InvokeInit)
+
+	//Data stream input handler -data-
+	http.HandleFunc("/data", setups.Inquery)
+
+	//Data integrity verification handler -verify-
 	http.HandleFunc("/verify", setups.Verify)
 
-	http.HandleFunc("/invokeInit", setups.InvokeInit)
-	//http.HandleFunc("/invokeUpdate", setups.InvokeUpdate)
-	//http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request){fmt.Fprintf(w, "<html><title>Haccp</title><button>1</buton><button>2</buton><button>3</buton><button>4</buton></html>")})
-	http.HandleFunc("/", LoadMain)
-	http.HandleFunc("/main", LoadMain)
-
+	http.HandleFunc("/dailyInvoke", setups.DailyInvoke)
+	
+	//Server start in background
 	fmt.Println("Listening (http://localhost:3001/)...")
+
 	if err := http.ListenAndServe(":3001", nil); err != nil {
 		fmt.Println(err)
 	}

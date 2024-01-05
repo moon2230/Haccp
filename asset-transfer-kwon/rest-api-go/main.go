@@ -6,6 +6,9 @@ import (
 )
 
 func main() {
+	//Database init
+	err := web.InitDatabase()
+
 	//Initialize setup for Org1
 	cryptoPath := "../../test-network/organizations/peerOrganizations/org1.example.com"
 	orgConfig := web.OrgSetup{
@@ -17,10 +20,13 @@ func main() {
 		PeerEndpoint: "localhost:7051",
 		GatewayPeer:  "peer0.org1.example.com",
 	}
-
 	orgSetup, err := web.Initialize(orgConfig)
 	if err != nil {
 		fmt.Println("Error initializing setup for Org1: ", err)
 	}
+
+	orgSetup.InvokeInit2()
+
+	//Server start
 	web.Serve(web.OrgSetup(*orgSetup))
 }

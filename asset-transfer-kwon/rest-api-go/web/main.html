@@ -4,28 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Haccp</title>
-    
 </head>
 <body>
-    <button id="apiButton">Init</button>
-    <button>Add</button>
-    <button>Read</button>
-    <button>ReadAll</button>
-    <button>Update</button>
+    <p>Hello Haccp</p>
+    <a href="http://localhost:3001/1">One</a>
+    <button id="clickInit">Init[No need]</button>
+    <button id="clickGetAll">GetAll</button>
+    <button id="clickAddBlock">AddBlock</button>
+    <button id="clickData">Data</button>
+    <button id="dailyInvoke">DailyInvoke</button>
+    <button id="verify">Verify</button>
+    
     <script>
-        document.getElementById("apiButton").addEventListener("click", function() {
-            // REST API 호출
-            fetch("http://localhost:3001/query?channelid=mychannel&chaincodeid=basic&function=GetAllHaccp", {
-                method: "GET" // 이 부분을 필요에 따라 변경 (GET, POST 등)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data); // API 응답 처리
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
+        document.getElementById("clickInit").addEventListener("click", 
+        function() {
+            window.location.href = "http://localhost:3001/invokeInit";
         });
+        document.getElementById("clickGetAll").addEventListener("click", 
+        function() {
+            window.location.href = "http://localhost:3001/query?channelid=mychannel&chaincodeid=basic&function=GetAllHaccp";
+        });
+        document.getElementById("clickAddBlock").addEventListener("click", 
+        function() {
+            window.location.href = "http://localhost:3001/invoke?channelid=mychannel&chaincodeid=basic&function=CreateHaccp&args=Fa120230107";
+        });
+        document.getElementById("clickData").addEventListener("click", 
+        function() {
+            window.location.href = "http://localhost:3001/data?name=Fa1&data=hellokwon";
+        });
+        document.getElementById("dailyInvoke").addEventListener("click", 
+        function() {
+            window.location.href = "http://localhost:3001/dailyInvoke?args=Fa1";
+        });
+        document.getElementById("verify").addEventListener("click", 
+        function() {
+            window.location.href = "http://localhost:3001/verify?factoryName=Fa1&date=20230107&data=Fa120230107";
+        });      
     </script>
 </body>
 </html>

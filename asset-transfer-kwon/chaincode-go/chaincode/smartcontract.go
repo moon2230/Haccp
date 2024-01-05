@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"crypto/sha256"
-	"encoding/base64"
+	//"encoding/base64"
 	"time"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -17,7 +17,7 @@ type SmartContract struct {
 //Cahincode by Kwon -start-
 type Haccp struct {
 	Fa 				string 			`json:Fa`
-	MerkleRoot 		string 	 		`json:MerkleRoot`
+	MerkleRoot 		string	 		`json:MerkleRoot`
 	Time 			string			`json:Time`
 }
 
@@ -33,13 +33,15 @@ func (s *SmartContract) InitHaccp(ctx contractapi.TransactionContextInterface) e
 
 	for _, haccp := range haccps {
 		hash := sha256.New()
-		haccp.MerkleRoot = base64.StdEncoding.EncodeToString(hash.Sum([]byte(haccp.Fa)))
+		hash.Write([]byte(haccp.Fa))
+		hashSum := hash.Sum(nil)
+		haccp.MerkleRoot = string(hashSum)
+		//fmt.Println(base64.StdEncoding.EncodeToString(hash.Sum([]byte(haccp.Fa))))
 		haccp.Time = time.Now().Format("2006-01-02 15:04:05")
 		haccpJSON, err := json.Marshal(haccp)
 		if err != nil {
 			return err
 		}
-
 		err = ctx.GetStub().PutState(haccp.Fa, haccpJSON)
 		if err != nil {
 			return fmt.Errorf("failed to put to world state. %v", err)
@@ -63,7 +65,6 @@ func (s *SmartContract) GetAllHaccp(ctx contractapi.TransactionContextInterface)
 		if err != nil {
 			return nil, err
 		}
-
 		var haccp Haccp
 		err = json.Unmarshal(queryResponse.Value, &haccp)
 		if err != nil {
@@ -86,7 +87,7 @@ func (s *SmartContract) CreateHaccp(ctx contractapi.TransactionContextInterface,
 
 	haccp := Haccp{Fa: faid}
 	hash := sha256.New()
-	haccp.MerkleRoot = base64.StdEncoding.EncodeToString(hash.Sum([]byte(haccp.Fa)))
+	haccp.MerkleRoot = string(hash.Sum([]byte(haccp.Fa)),)
 	haccp.Time = time.Now().Format("2006-01-02 15:04:05")
 	haccpJSON, err := json.Marshal(haccp)
 	if err != nil {
@@ -106,23 +107,26 @@ func (s *SmartContract) HaccpExists(ctx contractapi.TransactionContextInterface,
 }
 
 func (s *SmartContract) UpdateHaccp(ctx contractapi.TransactionContextInterface, faid string, mkroot string) error {
-	exists, err := s.HaccpExists(ctx, faid)
+	// -- This needs to be thought through
+	/*exists, err := s.HaccpExists(ctx, faid)
 	if err != nil {
 		return err
 	}
 	if !exists {
-		return fmt.Errorf("the asset %s does not exist", faid)
-	}
+		return fmt.Errorf("the asset %s does not existtt", mkroot)
+	}*/
+
 
 	// overwriting original asset with new asset
-	haccp := Haccp{Fa: faid, MerkleRoot: mkroot}
+	haccp := Haccp{Fa: faid}
+	haccp.MerkleRoot = mkroot
 	haccp.Time = time.Now().Format("2006-01-02 15:04:05")
 	haccpJSON, err := json.Marshal(haccp)
 	if err != nil {
 		return err
 	}
 
-	return ctx.GetStub().PutState(faid, haccpJSON)
+	return ctx.GetStub().PutState(haccp.Fa, haccpJSON)
 }
 
 func (s *SmartContract) ReadHaccp(ctx contractapi.TransactionContextInterface, faid string) (*Haccp, error) {
