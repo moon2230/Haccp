@@ -1,11 +1,13 @@
 package chaincode
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"crypto/sha256"
+
 	//"encoding/base64"
 	"time"
+
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -14,11 +16,11 @@ type SmartContract struct {
 	contractapi.Contract
 }
 
-//Cahincode by Kwon -start-
+// Cahincode by Kwon -start-
 type Haccp struct {
-	Fa 				string 			`json:Fa`
-	MerkleRoot 		string	 		`json:MerkleRoot`
-	Time 			string			`json:Time`
+	Fa         string `json:Fa`
+	MerkleRoot string `json:MerkleRoot`
+	Time       string `json:Time`
 }
 
 func (s *SmartContract) InitHaccp(ctx contractapi.TransactionContextInterface) error {
@@ -87,7 +89,9 @@ func (s *SmartContract) CreateHaccp(ctx contractapi.TransactionContextInterface,
 
 	haccp := Haccp{Fa: faid}
 	hash := sha256.New()
-	haccp.MerkleRoot = string(hash.Sum([]byte(haccp.Fa)),)
+	hash.Write([]byte(haccp.Fa))
+	hashSum := hash.Sum(nil)
+	haccp.MerkleRoot = string(hashSum)
 	haccp.Time = time.Now().Format("2006-01-02 15:04:05")
 	haccpJSON, err := json.Marshal(haccp)
 	if err != nil {
@@ -115,7 +119,6 @@ func (s *SmartContract) UpdateHaccp(ctx contractapi.TransactionContextInterface,
 	if !exists {
 		return fmt.Errorf("the asset %s does not existtt", mkroot)
 	}*/
-
 
 	// overwriting original asset with new asset
 	haccp := Haccp{Fa: faid}
