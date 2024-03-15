@@ -5,41 +5,285 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Haccp</title>
 </head>
+<style>
+body {
+    background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
+}
+
+#loginContainer {
+    background-color: #fff;
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 px rgba(0, 0, 0, 0.1);
+}
+
+#loginContainer p {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+
+}
+
+#loginContainer input[type="text"],
+#loginContainer input[type="password"] {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    
+}
+
+#loginButton {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#loginButton:hover {
+    background-color: #0056b3;
+}
+
+#apiContainer {
+    display: none;
+    background-color: #f9f9f9;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#apiContainer p {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#apiContainer button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#apiContainer a:hover,
+#apiContainer button:hover {
+    background-color: #0056b3;
+}
+
+
+#resultContainer {
+    margin-top: 20px;
+    font-family: monospace; 
+    padding: 10px; 
+    border: 2px solid #000; 
+    border-radius: 5px; 
+    background-color: #fff; 
+    color: #000; 
+    overflow: auto; 
+    max-height: 500px; 
+}
+
+#resultContainer h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+</style>
 <body>
-    <p>Hello Haccp</p>
-    <a href="http://localhost:3001/1">One</a>
-    <button id="clickInit">Init[No need]</button>
-    <button id="clickGetAll">GetAll</button>
-    <button id="clickAddBlock">AddBlock</button>
-    <button id="clickData">Data</button>
-    <button id="dailyInvoke">DailyInvoke</button>
-    <button id="verify">Verify</button>
+    <div id="loginContainer">
+        <p>Haccp Login</p>
+        <input type="text" id="username" placeholder="사용자 이름" autocomplete="username" />
+        <input type="password" id="password" placeholder="비밀번호" autocomplete="current-password" />
+        <button id="loginButton">로그인</button>
+    </div>
+
+    <div id="apiContainer" style="display: none;">
+        <p>Hello Haccp</p>
+        <button id="clickInit">Init[No need]</button>
+        <button id="clickGetAll">GetAll</button>
+        <button id="clickAddBlock">AddBlock</button>
+        <button id="clickData">Data</button>
+        <button id="dailyInvoke">DailyInvoke</button>
+        <button id="verify">Verify</button>
+    </div>
+
+    <div id="resultContainer">
+        <h2>Result</h2>
+        <div id="resultContent">
+        </div>
+    </div>
     
     <script>
-        document.getElementById("clickInit").addEventListener("click", 
-        function() {
-            window.location.href = "http://localhost:3001/invokeInit";
-        });
-        document.getElementById("clickGetAll").addEventListener("click", 
-        function() {
-            window.location.href = "http://localhost:3001/query?channelid=mychannel&chaincodeid=basic&function=GetAllHaccp";
-        });
-        document.getElementById("clickAddBlock").addEventListener("click", 
-        function() {
-            window.location.href = "http://localhost:3001/invoke?channelid=mychannel&chaincodeid=basic&function=CreateHaccp&args=Fa120230107";
-        });
-        document.getElementById("clickData").addEventListener("click", 
-        function() {
-            window.location.href = "http://localhost:3001/data?name=Fa1&data=hellokwon";
-        });
-        document.getElementById("dailyInvoke").addEventListener("click", 
-        function() {
-            window.location.href = "http://localhost:3001/dailyInvoke?args=Fa1";
-        });
-        document.getElementById("verify").addEventListener("click", 
-        function() {
-            window.location.href = "http://localhost:3001/verify?factoryName=Fa1&date=20230107&data=Fa120230107";
-        });      
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        
+        async function verifyTokenAndPerformAction(actionUrl) {
+            const storedToken = getCookie("jwtToken");
+            if (!storedToken) {
+                console.log("토큰이 없습니다. 로그인이 필요합니다.");
+                window.location.href = "http://localhost:3001/"; 
+                return;
+            }
+            if (storedToken) {
+                try {
+                    const verifyResponse = await fetch("http://localhost:3001/verifytoken", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ token: storedToken })
+                    });
+        
+                    if (verifyResponse.ok) {
+                        console.log("토큰 검증 성공");
+                        const response = await fetch(actionUrl)
+                        result = await response.text();
+                    } else {
+                        console.log("토큰 검증 실패");
+                        alert("토큰이 유효하지 않습니다. 다시 로그인하세요.");
+                        window.location.href = "http://localhost:3001/";
+                    }
+                } catch (error) {
+                    console.error("토큰 검증 중 오류 발생:", error);
+                }
+            } else {
+                console.log("토큰이 없습니다. 로그인이 필요합니다.");
+                alert("로그인이 필요합니다.");
+                window.location.href = "http://localhost:3001/";
+            }
+            return result;
+        }
+
+        async function verifyLoadAction(){
+            const storedToken = getCookie("jwtToken");
+            if (!storedToken) {
+                console.log("토큰이 없습니다. 로그인이 필요합니다.");
+                loginContainer.style.display = "block";
+                apiContainer.style.display = "none";
+                resultContainer.style.display = "none"
+                return;
+            }
+        
+            if (storedToken) {
+                try {
+                    const verifyResponse = await fetch("http://localhost:3001/verifytoken", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ token: storedToken })
+                    });
+                    if (verifyResponse.ok) {
+                        console.log("토큰 검증 성공");
+                        loginContainer.style.display = "none";
+                        apiContainer.style.display = "block";
+                        resultContainer.style.display = "block"
+                    } else {
+                        console.log("토큰 검증 실패");
+                        loginContainer.style.display = "block";
+                        apiContainer.style.display = "none";
+                        resultContainer.style.display = "none"
+                    }
+                } catch (error) {
+                    console.error("토큰 검증 중 오류 발생:", error);
+                }
+            }
+        }
+
+        function showResult(message) {
+            const resultContainer = document.getElementById("resultContainer");
+            const resultParagraph = document.createElement("p");
+            resultParagraph.textContent = message;
+            resultContainer.appendChild(resultParagraph);
+        }
+
+        window.addEventListener('load', verifyLoadAction)
+        const loginContainer = document.getElementById("loginContainer");
+        const apiContainer = document.getElementById("apiContainer");
+        document.getElementById("loginButton").addEventListener("click", async function() {
+            const ID = document.getElementById("username").value;
+            const PW = document.getElementById("password").value;
+            try {
+                const response = await fetch("http://localhost:3001/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username: ID, password: PW })
+                });
+                if (response.ok) {
+                    const { token } = await response.json();
+                    const expirationDate = new Date();
+                    expirationDate.setDate(expirationDate.getDate() + 1);
+                    if (document.cookie.includes('jwtToken')) {
+                        document.cookie = 'jwtToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    }
+                    document.cookie = `jwtToken=${token}; expires=${expirationDate.toUTCString()}; path=/`;
+                    console.log("JWT Token in Cookie:", document.cookie);
+                    loginContainer.style.display = "none";
+                    apiContainer.style.display = "block";
+                    resultContainer.style.display = "block"
+                } else {
+                    alert("로그인 실패. 사용자 이름과 비밀번호를 확인하세요.");
+                }
+            } catch (error) {
+                console.error("로그인 중 오류 발생:", error);
+                alert("로그인 중 오류가 발생했습니다.");
+            }
+            });
+
+            document.getElementById("clickInit").addEventListener("click", async function() {
+                const result = await verifyTokenAndPerformAction("http://localhost:3001/invokeInit");
+                showResult(result)
+            });
+            
+            document.getElementById("clickGetAll").addEventListener("click", async function() {
+                const result = await verifyTokenAndPerformAction("http://localhost:3001/query?channelid=mychannel&chaincodeid=basic&function=GetAllHaccp");
+                showResult(result)
+            });
+            
+            document.getElementById("clickAddBlock").addEventListener("click", async function() {
+                const result = await verifyTokenAndPerformAction("http://localhost:3001/invoke?channelid=mychannel&chaincodeid=basic&function=CreateHaccp&args=Fa120230107");
+                showResult(result)
+            });
+            
+            document.getElementById("clickData").addEventListener("click", async function() {
+                const result = await verifyTokenAndPerformAction("http://localhost:3001/data?name=Fa1&data=hellokwon");
+                showResult(result)
+            });
+            
+            document.getElementById("dailyInvoke").addEventListener("click", async function() {
+                const result = await verifyTokenAndPerformAction("http://localhost:3001/dailyInvoke?args=Fa1");
+                showResult(result)
+            });
+            
+            document.getElementById("verify").addEventListener("click", async function() {
+                const result = await verifyTokenAndPerformAction("http://localhost:3001/verify?factoryName=Fa1&date=20230107&data=Fa120230107");
+                showResult(result)
+            });
     </script>
 </body>
 </html>

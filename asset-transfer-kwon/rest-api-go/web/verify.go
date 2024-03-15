@@ -23,7 +23,7 @@ func (setup OrgSetup) Verify(w http.ResponseWriter, r *http.Request) {
 	factoryName := queryParams.Get("factoryName")
 	date := queryParams.Get("date")
 	data := queryParams.Get("data")
-	//테스트용 
+	//테스트용
 	//originalDatas := strings.Split(data, ",")
 	// var layerZero [][]byte
 	// for _, value := range originalDatas {
@@ -35,7 +35,7 @@ func (setup OrgSetup) Verify(w http.ResponseWriter, r *http.Request) {
 
 	// root := merkleTree(layerZero, len(layerZero))
 	// mkroot := string(root[0])
-	// 나중에 Create -> Updata로 바꿀시 위코드로 수정 필요 
+	// 나중에 Create -> Updata로 바꿀시 위코드로 수정 필요
 	hash := sha256.New()
 	hash.Write([]byte(data))
 	hashSum := hash.Sum(nil)
@@ -55,7 +55,7 @@ func (setup OrgSetup) Verify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var Bc_haccp Haccp
-	err = json.Unmarshal([]byte(Bc_data),&Bc_haccp)
+	err = json.Unmarshal([]byte(Bc_data), &Bc_haccp)
 	if err != nil {
 		fmt.Fprintf(w, "Error Unmarshalling Haccp object: %s", err)
 		return
@@ -66,19 +66,19 @@ func (setup OrgSetup) Verify(w http.ResponseWriter, r *http.Request) {
 	Verify_haccp.Time = date
 	Verify_haccpJSON, err := json.Marshal(Verify_haccp)
 	if err != nil {
-        fmt.Fprintf(w, "Error marshalling Haccp object: %s", err)
-        return
-    }
-	err = json.Unmarshal(Verify_haccpJSON,&Verify_haccp)
+		fmt.Fprintf(w, "Error marshalling Haccp object: %s", err)
+		return
+	}
+	err = json.Unmarshal(Verify_haccpJSON, &Verify_haccp)
 	if err != nil {
 		fmt.Fprintf(w, "Error Unmarshalling Haccp object: %s", err)
 		return
 	}
-    if Bc_haccp.MerkleRoot == Verify_haccp.MerkleRoot{
-        fmt.Fprintf(w, "Verification passed")
+	if Bc_haccp.MerkleRoot == Verify_haccp.MerkleRoot {
+		fmt.Fprintf(w, "Verification passed")
 		fmt.Println("Verification passed")
-    } else {
-        fmt.Fprintf(w, "Merkle Root does not match, verification failed")
+	} else {
+		fmt.Fprintf(w, "Merkle Root does not match, verification failed")
 		fmt.Println("Verification failed")
-    }
+	}
 }

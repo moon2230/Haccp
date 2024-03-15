@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"net/http"
+
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 )
 
@@ -21,6 +22,12 @@ type OrgSetup struct {
 
 // Serve starts http web server.
 func Serve(setups OrgSetup) {
+	// User verification handler
+	http.HandleFunc("/login", setups.Login)
+
+	// 요청시 토큰 검사를 수행하는 핸들러
+	http.HandleFunc("/verifytoken", setups.verifyToken)
+
 	//Main html page handler
 	http.HandleFunc("/", setups.PageMain)
 
@@ -40,7 +47,7 @@ func Serve(setups OrgSetup) {
 	http.HandleFunc("/verify", setups.Verify)
 
 	http.HandleFunc("/dailyInvoke", setups.DailyInvoke)
-	
+
 	//Server start in background
 	fmt.Println("Listening (http://localhost:3001/)...")
 
