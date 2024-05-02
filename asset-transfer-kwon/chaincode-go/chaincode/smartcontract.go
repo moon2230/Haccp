@@ -79,13 +79,13 @@ func (s *SmartContract) GetAllHaccp(ctx contractapi.TransactionContextInterface)
 }
 
 func (s *SmartContract) CreateHaccp(ctx contractapi.TransactionContextInterface, faid string) error {
-	exists, err := s.HaccpExists(ctx, faid)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return fmt.Errorf("the asset %s already exists", faid)
-	}
+	// exists, err := s.HaccpExists(ctx, faid)
+	// if err != nil {
+	// 	return err
+	// }
+	// if exists {
+	// 	return fmt.Errorf("the asset %s already exists", faid)
+	// }
 
 	haccp := Haccp{Fa: faid}
 	hash := sha256.New()
@@ -110,7 +110,29 @@ func (s *SmartContract) HaccpExists(ctx contractapi.TransactionContextInterface,
 	return haccpJSON != nil, nil
 }
 
-func (s *SmartContract) UpdateHaccp(ctx contractapi.TransactionContextInterface, faid string, mkroot string) error {
+// func (s *SmartContract) UpdateHaccp(ctx contractapi.TransactionContextInterface, faid string, mkroot string) error {
+// 	// -- This needs to be thought through
+// 	/*exists, err := s.HaccpExists(ctx, faid)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if !exists {
+// 		return fmt.Errorf("the asset %s does not existtt", mkroot)
+// 	}*/
+
+// 	// overwriting original asset with new asset
+// 	haccp := Haccp{Fa: faid}
+// 	haccp.MerkleRoot = mkroot
+// 	haccp.Time = time.Now().Format("2006-01-02 15:04:05")
+// 	haccpJSON, err := json.Marshal(haccp)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return ctx.GetStub().PutState(haccp.Fa, haccpJSON)
+// }
+
+func (s *SmartContract) UpdateHaccp(ctx contractapi.TransactionContextInterface, faid string, mkroot string, time string) error {
 	// -- This needs to be thought through
 	/*exists, err := s.HaccpExists(ctx, faid)
 	if err != nil {
@@ -121,9 +143,11 @@ func (s *SmartContract) UpdateHaccp(ctx contractapi.TransactionContextInterface,
 	}*/
 
 	// overwriting original asset with new asset
-	haccp := Haccp{Fa: faid}
-	haccp.MerkleRoot = mkroot
-	haccp.Time = time.Now().Format("2006-01-02 15:04:05")
+	haccp := Haccp{
+		Fa:         faid,
+		MerkleRoot: mkroot,
+		Time:       time,
+	}
 	haccpJSON, err := json.Marshal(haccp)
 	if err != nil {
 		return err

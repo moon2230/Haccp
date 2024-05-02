@@ -266,7 +266,7 @@ body {
             });
             
             document.getElementById("clickAddBlock").addEventListener("click", async function() {
-                const result = await verifyTokenAndPerformAction("http://localhost:3001/invoke?channelid=mychannel&chaincodeid=basic&function=CreateHaccp&args=Fa120230107");
+                const result = await verifyTokenAndPerformAction("http://localhost:3001/invoke?channelid=mychannel&chaincodeid=basic&function=UpdateHaccp&args=Fa120230107");
                 showResult(result)
             });
             

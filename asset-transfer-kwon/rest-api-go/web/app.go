@@ -25,7 +25,7 @@ func Serve(setups OrgSetup) {
 	// User verification handler
 	http.HandleFunc("/login", setups.Login)
 
-	// 요청시 토큰 검사를 수행하는 핸들러
+	// User Token verification handler
 	http.HandleFunc("/verifytoken", setups.verifyToken)
 
 	//Main html page handler

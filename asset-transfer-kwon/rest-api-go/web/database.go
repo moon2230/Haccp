@@ -6,18 +6,18 @@ import (
 	"time"
 
 	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
 
 	"crypto/sha256"
 )
 
-//
-func databaseOpen()(*sql.DB, error){
+func databaseOpen() (*sql.DB, error) {
 	db, err := sql.Open("mysql", "ck@tcp(localhost:3306)/haccp")
 
 	err = db.Ping()
-	if err != nil{
-		if err.Error() == "Error 1049 (42000): Unknown database 'haccp'"{
+	if err != nil {
+		if err.Error() == "Error 1049 (42000): Unknown database 'haccp'" {
 			db.Close()
 			db, err = sql.Open("mysql", "ck@tcp(localhost:3306)/")
 
@@ -32,12 +32,11 @@ func databaseOpen()(*sql.DB, error){
 	return db, err
 }
 
-//
-func databaseTable(db *sql.DB, tableName string)(error){
+func databaseTable(db *sql.DB, tableName string) error {
 	checkTable := "Select Factory ,Time, Data from haccp." + tableName
 	_, err := db.Exec(checkTable)
 	if err != nil {
-		if err.Error() == "Error 1146 (42S02): Table 'haccp." + tableName + "' doesn't exist"{
+		if err.Error() == "Error 1146 (42S02): Table 'haccp."+tableName+"' doesn't exist" {
 			createTable := "create table " + tableName + "(Factory text, Time datetime, Data Blob)"
 			_, err = db.Exec(createTable)
 		}
@@ -45,13 +44,12 @@ func databaseTable(db *sql.DB, tableName string)(error){
 	return err
 }
 
-//
-func InitDatabase()(error){
+func InitDatabase() error {
 	db, err := sql.Open("mysql", "ck@tcp(localhost:3306)/haccp")
 
 	err = db.Ping()
-	if err != nil{
-		if err.Error() == "Error 1049 (42000): Unknown database 'haccp'"{
+	if err != nil {
+		if err.Error() == "Error 1049 (42000): Unknown database 'haccp'" {
 			db.Close()
 			db, err = sql.Open("mysql", "ck@tcp(localhost:3306)/")
 
@@ -76,17 +74,15 @@ func (setup OrgSetup) Inquery(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(data)
 	name := queryParams.Get("name")
 	fmt.Println(name)
-	
 
 	db, err := databaseOpen()
-	if err != nil{
+	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
-	
 
 	err = databaseTable(db, "leaf")
-	if err != nil{
+	if err != nil {
 		panic(err.Error())
 	}
 
@@ -96,7 +92,7 @@ func (setup OrgSetup) Inquery(w http.ResponseWriter, r *http.Request) {
 
 	insertRecord := "insert into leaf (Factory, Time, Data) values (?, ?, ?)"
 	_, err = db.Exec(insertRecord, name, time.Now().Format("2006-01-02 15:04:05"), s)
-	if err != nil{
+	if err != nil {
 		panic(err.Error())
 	}
 

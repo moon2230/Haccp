@@ -23,6 +23,14 @@ func (setup *OrgSetup) Invoke(w http.ResponseWriter, r *http.Request) {
 	function := r.FormValue("function")
 	args := r.Form["args"]
 	fmt.Printf("channel: %s, chaincode: %s, function: %s, args: %s\n", channelID, chainCodeName, function, args)
+
+	hash := sha256.New()
+	hash.Write([]byte(args[0]))
+	hashSum := hash.Sum(nil)
+	MerkleRoot := string(hashSum)
+	Time := time.Now().Format("2006-01-02 15:04:05")
+	args = append(args, MerkleRoot, Time)
+
 	network := setup.Gateway.GetNetwork(channelID)
 	contract := network.GetContract(chainCodeName)
 	txn_proposal, err := contract.NewProposal(function, client.WithArguments(args...))
