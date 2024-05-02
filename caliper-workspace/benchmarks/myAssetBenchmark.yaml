@@ -1,0 +1,38 @@
+test:
+  name: basic-contract-benchmark
+  description: "test benchmark"
+  workers:
+    type: local
+    number: 2
+  rounds:
+    - label: UpdateHaccp
+      description: "UpdateHaccp benchmark"
+      txDuration: 5000
+      rateControl:
+        type: fixed-load
+        opts:
+          transactionLoad: 5
+      workload:
+        module: workload/UpdateHaccp.js
+    - label: ReadHaccp
+      description: "ReadHaccp benchmark"
+      txDuration: 30
+      rateControl:
+        type: fixed-load
+        opts:
+          transactionLoad: 5
+      workload:
+        module: workload/ReadHaccp.js
+        arguments:
+          assets: 500
+    - label: GetAllHaccp
+      description: "GetAllHaccp benchmark"
+      txDuration: 30
+      rateControl:
+        type: fixed-load
+        opts:
+          transactionLoad: 5
+      workload:
+        module: workload/GetAllHaccp.js
+        arguments:
+          assets: 500

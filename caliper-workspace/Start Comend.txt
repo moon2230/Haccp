@@ -1,0 +1,2 @@
+칼리퍼 벤치 마크 실행 커맨드 
+npx caliper launch manager --caliper-workspace ./ --caliper-networkconfig networks/networkConfig.yaml --caliper-benchconfig benchmarks/myAssetBenchmark.yaml --caliper-flow-only-test --caliper-fabric-gatewoa-enbled
