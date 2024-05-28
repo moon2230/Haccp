@@ -22,33 +22,25 @@ type OrgSetup struct {
 
 // Serve starts http web server.
 func Serve(setups OrgSetup) {
+
 	// User verification handler
 	http.HandleFunc("/login", setups.Login)
 
 	// User Token verification handler
-	http.HandleFunc("/verifytoken", setups.verifyToken)
+	http.HandleFunc("/loadverify", setups.Loadverify)
 
-	//Main html page handler
+	// Main html page handler
 	http.HandleFunc("/", setups.PageMain)
 
-	//Blockchain Query handler - gettAll
-	http.HandleFunc("/query", setups.Query)
+	// Protected routes
+	http.Handle("/query", JWTMiddleware(http.HandlerFunc(setups.Query)))
+	http.Handle("/invoke", JWTMiddleware(http.HandlerFunc(setups.Invoke)))
+	http.Handle("/invokeInit", JWTMiddleware(http.HandlerFunc(setups.InvokeInit)))
+	http.Handle("/data", JWTMiddleware(http.HandlerFunc(setups.Inquery)))
+	http.Handle("/verify", JWTMiddleware(http.HandlerFunc(setups.Verify)))
+	http.Handle("/dailyInvoke", JWTMiddleware(http.HandlerFunc(setups.DailyInvoke)))
 
-	//Blockchain Invoke handler
-	http.HandleFunc("/invoke", setups.Invoke)
-
-	//Blockchain init handler -Init-
-	http.HandleFunc("/invokeInit", setups.InvokeInit)
-
-	//Data stream input handler -data-
-	http.HandleFunc("/data", setups.Inquery)
-
-	//Data integrity verification handler -verify-
-	http.HandleFunc("/verify", setups.Verify)
-
-	http.HandleFunc("/dailyInvoke", setups.DailyInvoke)
-
-	//Server start in background
+	// Server start in background
 	fmt.Println("Listening (http://localhost:3001/)...")
 
 	if err := http.ListenAndServe(":3001", nil); err != nil {

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -23,9 +22,9 @@ func (setup *OrgSetup) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if isValidUser(loginRequest.Username, loginRequest.Password) {
+	if IsValidUser(loginRequest.Username, loginRequest.Password) {
 		fmt.Println("ID 및 비밀번호 인증 완료. 토큰 생성")
-		token, err := generateToken(loginRequest.Username)
+		token, err := GenerateToken(loginRequest.Username)
 		if err != nil {
 			fmt.Println("토큰 생성 오류:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -33,7 +32,7 @@ func (setup *OrgSetup) Login(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println("토큰:", token)
 		response := map[string]string{"token": token}
-		jsonResponse(w, http.StatusOK, response)
+		JsonResponse(w, http.StatusOK, response)
 		fmt.Println("응답 전송 완료")
 	} else {
 		fmt.Println("ID 및 비밀번호 인증 실패")
@@ -41,7 +40,7 @@ func (setup *OrgSetup) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (setup *OrgSetup) verifyToken(w http.ResponseWriter, r *http.Request) {
+func (setup *OrgSetup) Loadverify(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received verify request")
 
 	if r.Method != http.MethodPost {
@@ -76,34 +75,22 @@ func (setup *OrgSetup) verifyToken(w http.ResponseWriter, r *http.Request) {
 		response := map[string]interface{}{
 			"message": "토큰 검증 성공",
 		}
-		jsonResponse(w, http.StatusOK, response)
+		JsonResponse(w, http.StatusOK, response)
 		fmt.Println("토큰 검증 성공")
 	} else {
 		response := map[string]interface{}{
 			"message": "토큰이 유효하지 않습니다. 다시 로그인하세요.",
 		}
-		jsonResponse(w, http.StatusUnauthorized, response)
+		JsonResponse(w, http.StatusUnauthorized, response)
 		fmt.Println("토큰이 유효하지않습니다")
 	}
 }
 
-func isValidUser(username, password string) bool {
+func IsValidUser(username, password string) bool {
 	return username == "user" && password == "pass"
 }
 
-func generateToken(username string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = username
-	claims["exp"] = time.Now().Add(time.Minute * 10).Unix()
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
-}
-
-func jsonResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+func JsonResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(data)

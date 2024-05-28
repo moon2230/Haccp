@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+
 	//Database init
 	err := web.InitDatabase()
 
@@ -26,6 +27,8 @@ func main() {
 	}
 
 	orgSetup.InvokeInit2()
+
+	go web.SaveDataPeriodically()
 
 	//Server start
 	web.Serve(web.OrgSetup(*orgSetup))

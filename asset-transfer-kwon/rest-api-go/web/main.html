@@ -147,35 +147,30 @@ body {
                 window.location.href = "http://localhost:3001/"; 
                 return;
             }
-            if (storedToken) {
-                try {
-                    const verifyResponse = await fetch("http://localhost:3001/verifytoken", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ token: storedToken })
-                    });
         
-                    if (verifyResponse.ok) {
-                        console.log("토큰 검증 성공");
-                        const response = await fetch(actionUrl)
-                        result = await response.text();
-                    } else {
-                        console.log("토큰 검증 실패");
-                        alert("토큰이 유효하지 않습니다. 다시 로그인하세요.");
-                        window.location.href = "http://localhost:3001/";
+            try {
+                    const actionResponse = await fetch(actionUrl, {
+                    method: "GET", // or "POST" or whatever method your action URL requires
+                    headers: {
+                        "Authorization": `Bearer ${storedToken}` // Include the token in the Authorization header
                     }
-                } catch (error) {
-                    console.error("토큰 검증 중 오류 발생:", error);
+                });
+        
+                if (!actionResponse.ok) {
+                    console.error("Action 요청 중 오류 발생:", actionResponse.status);
+                    // 오류 처리
+                    return;
                 }
-            } else {
-                console.log("토큰이 없습니다. 로그인이 필요합니다.");
-                alert("로그인이 필요합니다.");
-                window.location.href = "http://localhost:3001/";
+        
+                const result = await actionResponse.text();
+                console.log("Action 결과:", result);
+                return result;
+            } catch (error) {
+                console.error("요청 중 오류 발생:", error);
+                // 오류 처리
             }
-            return result;
         }
+        
 
         async function verifyLoadAction(){
             const storedToken = getCookie("jwtToken");
@@ -189,7 +184,7 @@ body {
         
             if (storedToken) {
                 try {
-                    const verifyResponse = await fetch("http://localhost:3001/verifytoken", {
+                    const verifyResponse = await fetch("http://localhost:3001/loadverify", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

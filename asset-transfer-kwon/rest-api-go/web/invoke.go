@@ -148,6 +148,7 @@ func (setup *OrgSetup) DailyInvoke(w http.ResponseWriter, r *http.Request) {
 	var res string
 
 	checkTable := "Select data from haccp.leaf where Factory = '" + args + "' and Date(Time) = curdate()"
+
 	rows, err := db.Query(checkTable)
 	if err != nil {
 		fmt.Println("Query error.")
@@ -176,9 +177,11 @@ func (setup *OrgSetup) DailyInvoke(w http.ResponseWriter, r *http.Request) {
 	network := setup.Gateway.GetNetwork(channelID)
 	contract := network.GetContract(chainCodeName)
 
-	faName := args + time.Now().Format("20060102")
+	faName := args
+	//Time := time.Now().Format("20060102")
+	Time := time.Now().Format("2006-01-02 15:04:05")
 
-	txn_proposal, err := contract.NewProposal(function, client.WithArguments(faName, mkroot))
+	txn_proposal, err := contract.NewProposal(function, client.WithArguments(faName, Time, mkroot))
 	if err != nil {
 		fmt.Fprintf(w, "Error creating txn proposal: %s", err)
 		return
