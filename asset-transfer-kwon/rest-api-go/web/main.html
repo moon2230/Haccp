@@ -158,8 +158,8 @@ body {
         
                 if (!actionResponse.ok) {
                     console.error("Action 요청 중 오류 발생:", actionResponse.status);
-                    // 오류 처리
-                    return;
+                    alert("Access Denied")
+                    return ;
                 }
         
                 const result = await actionResponse.text();
@@ -207,13 +207,20 @@ body {
                 }
             }
         }
-
         function showResult(message) {
             const resultContainer = document.getElementById("resultContainer");
             const resultParagraph = document.createElement("p");
-            resultParagraph.textContent = message;
+            
+            // 만약 접근이 거부되었다면, 접근 거부 메시지를 표시하고 그렇지 않다면 결과 메시지를 표시합니다.
+            if (message === "Access Denied") {
+                resultParagraph.textContent = "Access Forbidden: You do not have permission to access this resource.";
+            } else {
+                resultParagraph.textContent = message;
+            }
+            
             resultContainer.appendChild(resultParagraph);
         }
+        
 
         window.addEventListener('load', verifyLoadAction)
         const loginContainer = document.getElementById("loginContainer");

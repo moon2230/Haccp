@@ -33,12 +33,12 @@ func Serve(setups OrgSetup) {
 	http.HandleFunc("/", setups.PageMain)
 
 	// Protected routes
-	http.Handle("/query", JWTMiddleware(http.HandlerFunc(setups.Query)))
-	http.Handle("/invoke", JWTMiddleware(http.HandlerFunc(setups.Invoke)))
-	http.Handle("/invokeInit", JWTMiddleware(http.HandlerFunc(setups.InvokeInit)))
-	http.Handle("/data", JWTMiddleware(http.HandlerFunc(setups.Inquery)))
-	http.Handle("/verify", JWTMiddleware(http.HandlerFunc(setups.Verify)))
-	http.Handle("/dailyInvoke", JWTMiddleware(http.HandlerFunc(setups.DailyInvoke)))
+	http.Handle("/invoke", http.HandlerFunc(setups.Invoke))
+	http.Handle("/invokeInit", http.HandlerFunc(setups.InvokeInit))
+	http.Handle("/query", JWTAndRoleMiddleware(http.HandlerFunc(setups.Query)))
+	http.Handle("/data", JWTAndRoleMiddleware(http.HandlerFunc(setups.Inquery)))
+	http.Handle("/verify", JWTAndRoleMiddleware(http.HandlerFunc(setups.Verify)))
+	http.Handle("/dailyInvoke", http.HandlerFunc(setups.DailyInvoke))
 
 	// Server start in background
 	fmt.Println("Listening (http://localhost:3001/)...")
