@@ -131,6 +131,7 @@ func (s *SmartContract) HaccpExists(ctx contractapi.TransactionContextInterface,
 
 // 	return ctx.GetStub().PutState(haccp.Fa, haccpJSON)
 // }
+// 체인코드에서 타임 값을 생성시 각 Peer의 시간동기화 문제가 발생하여 합의가 실패함 이를 해결하기위해 Invoke 요청시 Time 변수값도 전달받도록 수정함
 
 func (s *SmartContract) UpdateHaccp(ctx contractapi.TransactionContextInterface, faid string, mkroot string, time string) error {
 	// -- This needs to be thought through

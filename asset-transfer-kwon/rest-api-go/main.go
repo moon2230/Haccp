@@ -29,6 +29,8 @@ func main() {
 	orgSetup.InvokeInit2()
 
 	go web.SaveDataPeriodically()
+	//DB 데이터 저장시 성능 향상을 위해 초당 1000개이하의 데이터가 들어오면 1초에 한번씩 Insert 실행
+	//만약 초당 1000개 이상이 들어오면 리스트에 1000개를 저장했다가 1000개일때 저장
 
 	//Server start
 	web.Serve(web.OrgSetup(*orgSetup))

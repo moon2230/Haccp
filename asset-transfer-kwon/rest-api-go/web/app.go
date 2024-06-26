@@ -39,6 +39,11 @@ func Serve(setups OrgSetup) {
 	http.Handle("/data", JWTAndRoleMiddleware(http.HandlerFunc(setups.Inquery)))
 	http.Handle("/verify", JWTAndRoleMiddleware(http.HandlerFunc(setups.Verify)))
 	http.Handle("/dailyInvoke", http.HandlerFunc(setups.DailyInvoke))
+	//test
+
+	// http.HandleFunc("/data", setups.Inquery)
+	// http.HandleFunc("/dailyInvoke", setups.DailyInvoke)
+	// Jmeter로 테스트시 중간 미들웨어에서 토큰 검증으로 인해 거부되기 때문에 검증을 거치지 않는 테스트 용도의 코드
 
 	// Server start in background
 	fmt.Println("Listening (http://localhost:3001/)...")

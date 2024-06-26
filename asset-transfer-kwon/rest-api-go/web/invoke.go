@@ -178,7 +178,7 @@ func (setup *OrgSetup) DailyInvoke(w http.ResponseWriter, r *http.Request) {
 	contract := network.GetContract(chainCodeName)
 
 	faName := args
-	//Time := time.Now().Format("20060102")
+	//Time := time.Now().Format("20060102")//타입포맷 변경
 	Time := time.Now().Format("2006-01-02 15:04:05")
 
 	txn_proposal, err := contract.NewProposal(function, client.WithArguments(faName, Time, mkroot))

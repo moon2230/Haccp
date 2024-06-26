@@ -101,6 +101,7 @@ func InitDatabase() error {
 // 	fmt.Println(time.Now().Format("2006-01-02 15:04:05"))
 // 	fmt.Fprintf(w, "Response: %s", data)
 // }
+// DB 성능향상을 위해 Inquery문을 리스트에 저장하느 방식으로 변경하고 이를  측정하여 1초 or 1000개씩 한번에 저장함
 
 var mu sync.Mutex
 var records [][]interface{}
